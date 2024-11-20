@@ -40,6 +40,14 @@ class BookService {
         return bookInfo;
     }
     async getChapters(url) {
+        //https://old.ranobelib.me/old/manga/urasekai-picnic-novel
+        //https://old.ranobelib.me/old/manga/25335--seishun-buta-yaro
+        //https://old.ranobelib.me/old/manga/juuni-kokuki
+        //https://old.ranobelib.me/old/manga/steinsgate-youen-no-valhalla
+        //https://old.ranobelib.me/old/manga/nauji-vartai-novel
+        //https://old.ranobelib.me/old/manga/51096--pact
+        //https://old.ranobelib.me/old/manga/105979--twig
+        //https://old.ranobelib.me/old/manga/138181--tenkyuu-kakeru-sputnik
         
         let html = await axios({
           method: 'get',
@@ -91,9 +99,10 @@ class BookService {
                     }
                 }
                 if(add) {
+                    //https://old.ranobelib.me/old/25335--seishun-buta-yaro/v1/c0?bid=8630
                     let link = url.replace('manga/', '') + '/v'+item.volume+'/c'+item.number+'?bid=' + branch_id
                     chaptersWithTitles.push({ 
-                        id: item.item_number, 
+                        id: index, 
                         title: item.name, 
                         link: link
                     });
@@ -102,13 +111,19 @@ class BookService {
             } else {
                 let link = url.replace('manga/', '') + '/v'+item.volume+'/c'+item.number
                 chaptersWithTitles.push({ 
-                    id: item.item_number, 
+                    id: index, 
                     title: item.name, 
                     link: link
                 });
                 index++;
             }
         }
+        //chaptersWithTitles = chaptersWithTitles.reverse();
+        
+        // Сортирую главы по порядку
+        // сделал именно сортировкой, так как решил перестраховаться, что все главы в правильном порядке будут
+        chaptersWithTitles.sort((a, b) => a.id - b.id);
+        
         return chaptersWithTitles;
     }
     async getChapterContent(url) {
@@ -143,9 +158,6 @@ class BookService {
             };
             bookContent.push(cacheData);
         }
-        // Сортирую главы по порядку
-        // сделал именно сортировкой, так как решил перестраховаться, что все главы в правильном порядке будут
-        bookContent.sort((a, b) => b.id - a.id);
         return bookContent;
     }
     generateEpubFromData(bookData) {

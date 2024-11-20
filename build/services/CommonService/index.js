@@ -7,7 +7,7 @@ class CommonService {
         this.$promtSync = $promtSync;
     }
     userAlert() {
-        console.log('Здравствуйте, это программа загрузки книг с сайта ranobelib.me');
+        console.log('Здравствуйте, это программа загрузки книг с сайта old.ranobelib.me');
         console.log('Пожалуйста, прочитайте информацию ниже.');
         console.log('\nВо время загрузки у Вас, несколько раз, будет открываться и закрываться окно браузера.');
         console.log('Пожалуйста, не беспокойтесь, так и должно быть.');
@@ -16,7 +16,7 @@ class CommonService {
     getBookURL() {
         const prompt = this.$promtSync({ sigint: true });
         console.log("\nВведите, пожалуйста, адрес книги с сайта ranobelib.me");
-        console.log("Пример адреса: https://ranobelib.me/sakurasou-no-pet-na-kanojo-novel");
+        console.log("Пример адреса: https://old.ranobelib.me/old/manga/138524--sword-art-online-side-stories");
         console.log('Пожалуйста, указывайте верный адрес, во избежания проблем с работой программы.');
         const URL = prompt({});
         console.log(`\nСейчас начнется загрузка книги, по адресу: ${URL}`);
