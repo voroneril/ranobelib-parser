@@ -19,8 +19,8 @@ class BookService {
         this.$commonService = $commonService;
         this.$promptSync = $promptSync;
     }
-    async getBookInfo(url) {
-        const { browser, page } = await this.$browserService.startBrowser();
+    async getBookInfo(url, adult_caution) {
+        const { browser, page } = await this.$browserService.startBrowser(adult_caution);
         await this.$browserService.gotoPage(page, url);
         // Паршу инфу по книге на ее главной странице
         const bookInfo = await page.evaluate(() => {
@@ -39,7 +39,7 @@ class BookService {
         await this.$browserService.closeBrowser(browser);
         return bookInfo;
     }
-    async getChapters(url) {
+    async getChapters(url, adult_caution) {
         //https://old.ranobelib.me/old/manga/urasekai-picnic-novel
         //https://old.ranobelib.me/old/manga/25335--seishun-buta-yaro
         //https://old.ranobelib.me/old/manga/juuni-kokuki
@@ -49,11 +49,20 @@ class BookService {
         //https://old.ranobelib.me/old/manga/105979--twig
         //https://old.ranobelib.me/old/manga/138181--tenkyuu-kakeru-sputnik
         
-        let html = await axios({
-          method: 'get',
-          url: url
-        })
-        html = html.data;
+        let html;
+        
+        if(adult_caution) {
+            const { browser, page } = await this.$browserService.startBrowser(adult_caution);
+            await this.$browserService.gotoPage(page, url);
+            html = await page.content();
+            await this.$browserService.closeBrowser(browser);
+        } else {
+            html = await axios({
+              method: 'get',
+              url: url
+            })
+            html = html.data;
+        }
         
         let __CONTENT__ = JSON.parse(html.match(/window\.__CONTENT__ \= (.*?);\n/)[1]);
         let __BRANCHES__ = JSON.parse(html.match(/window\.__BRANCHES__ \= (.*?);\n/)[1]);
@@ -100,7 +109,8 @@ class BookService {
                 }
                 if(add) {
                     //https://old.ranobelib.me/old/25335--seishun-buta-yaro/v1/c0?bid=8630
-                    let link = url.replace('manga/', '') + '/v'+item.volume+'/c'+item.number+'?bid=' + branch_id
+                    //https://old.ranobelib.me/old/21481--kara-no-kyoukai/read/v1/c1
+                    let link = url.replace('manga/', '').split('?')[0] + '/read/v'+item.volume+'/c'+item.number+'?bid=' + branch_id
                     chaptersWithTitles.push({ 
                         id: index, 
                         title: item.name, 
@@ -109,7 +119,7 @@ class BookService {
                     index++;
                 }
             } else {
-                let link = url.replace('manga/', '') + '/v'+item.volume+'/c'+item.number
+                let link = url.replace('manga/', '').split('?')[0] + '/read/v'+item.volume+'/c'+item.number
                 chaptersWithTitles.push({ 
                     id: index, 
                     title: item.name, 
@@ -126,8 +136,7 @@ class BookService {
         
         return chaptersWithTitles;
     }
-    async getChapterContent(url) {
-        const { browser, page } = await this.$browserService.startBrowser();
+    async getChapterContent(page, url) {
         await this.$browserService.gotoPage(page, url);
         // Получаю контент главы, переданной в функцию
         const bookContent = await page.evaluate(() => {
@@ -142,14 +151,14 @@ class BookService {
                 return '';
             }
         });
-        await this.$browserService.closeBrowser(browser);
         return bookContent;
     }
-    async getAllBookContent(bookChapters) {
+    async getAllBookContent(bookChapters, adult_caution) {
         const bookContent = [];
         console.log('Прохожусь по всем главам, собираю с них весь контент и кладу его в один массив')
+        const { browser, page } = await this.$browserService.startBrowser(adult_caution);
         for (const chapter of bookChapters) {
-            const content = await this.getChapterContent(chapter.link);
+            const content = await this.getChapterContent(page, chapter.link);
             await this.$commonService.delay(2000);
             const cacheData = {
                 data: content,
@@ -158,6 +167,7 @@ class BookService {
             };
             bookContent.push(cacheData);
         }
+        await this.$browserService.closeBrowser(browser);
         return bookContent;
     }
     generateEpubFromData(bookData) {

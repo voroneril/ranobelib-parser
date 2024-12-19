@@ -1,7 +1,7 @@
 {
   "name": "ranobelib-parser",
   "version": "1.0.0",
-  "description": "Book parser for https://ranobelib.me Парсер книг для сайта https://ranobelib.me",
+  "description": "Парсер книг для сайта https://ranobelib.me",
   "repository": {
     "type": "git",
     "url": "https://github.com/K1nGsmaN-hub/ranobelib-parser"
@@ -17,7 +17,8 @@
   ],
   "main": "src/index.js",
   "scripts": {
-    "start": "node build/main.js"
+    "start": "node build/main.js",
+    "adult": "ADULT=1 node build/main.js"
   },
   "author": "Ilya Ryadinskii",
   "license": "MIT",
